@@ -40,8 +40,9 @@ void helpScreen()
 	printf("Format: ./yourfile.out D filename.extension\n\n");
 	
 	printf("P: Prints files\n");
-	printf("Format: ./yourfile.out P filename.extension\n\n");
-
+	printf("Format: ./yourfile.out P filename\n");
+	printf("DO NOT ADD EXTENSION TO FILENAME\n\n");
+		
 	printf("M: Creates and stores file\n");
 	
 	return;
@@ -99,8 +100,11 @@ int main(int argc, char* argv[])
 		//load the directory from sector 257
 		char dir[512];
 		fseek(floppy,512*257,SEEK_SET);
+
 		for (i=0; i<512; i++)
+		{
 			dir[i]=fgetc(floppy);
+		}
 		// if-else for user input 
 		if(*argv[1] == 'L')
 		{
@@ -147,8 +151,84 @@ int main(int argc, char* argv[])
 
 				byteTotal = byteTotal + 512*dir[i+10];
 			}
-			printf("\nFree space: %i\nB", 261632 - byteTotal);
+			printf("\nFree space: %iB\n", 261632 - byteTotal);
 			printf("Space used: %i/261632B\n", byteTotal);
+		}
+		else if(*argv[1] == 'P')
+		{
+			int argumentSize = 0;
+			int j = 0;
+			
+			int fileNameSize = 0;
+			int foundFlag = 0;
+
+			int foundIndex = 0;
+			// get size of our input filename 
+			while(argv[2][j] != '\0')
+			{	
+				argumentSize++; 
+				j++;	
+			}	
+
+			// go through directory trying to match file name without extension
+			for(int i = 0; i < 512; i += 16)
+			{
+			
+				// stop when we hit our first zero, because everything is allocated contiguously 
+				// also stop if we found where the word was 
+				if(dir[i] == 0 || foundFlag == 1) break;
+				// go through each non null terminated letter of our input arg
+					
+				j = 0; // counting variable for going through argv 
+				fileNameSize = 0;	
+					
+				// check size of current name 
+				for(int k = 0; k < 8; k++)
+				{
+					if(dir[i+k] != 0)
+					{
+						fileNameSize++;
+					}
+					else 
+					{
+						break;
+					}	
+				}
+				// if the names are the same size
+				if(argumentSize == fileNameSize)
+				{
+					for(int z = 0; z < fileNameSize; z++)
+					{
+						if(dir[i+z] != argv[2][z])
+						{
+							foundFlag = 0; 
+							foundIndex = 0;
+							break;	
+						}
+						else 
+						{
+							foundIndex = i;
+							foundFlag = 1;
+						}
+					}
+				}
+
+				if(foundFlag == 1)
+				{
+					break;
+				}
+			}
+			// if we manage to find the flag and we find the contents of file...
+			if(foundFlag == 1) 
+			{
+				printf("FOUND\n");
+			}
+			else
+			{
+				printf("FILE NOT FOUND\n");
+			}
+
+
 		}
 		else 
 		{
@@ -156,14 +236,14 @@ int main(int argc, char* argv[])
 			helpScreen();
 		}
 
-		/*
+		
 		//write the map and directory back to the floppy image
 		fseek(floppy,512*256,SEEK_SET);
 		for (i=0; i<512; i++) fputc(map[i],floppy);
 
 		fseek(floppy,512*257,SEEK_SET);
 		for (i=0; i<512; i++) fputc(dir[i],floppy);
-		*/
+		
 
 		//printf("%s", argv[1]);
 		fclose(floppy);

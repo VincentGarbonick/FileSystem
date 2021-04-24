@@ -34,8 +34,14 @@
 void helpScreen()
 {
 	printf("L: Lists files\n");
+	printf("Format: ./yourfile.out L\n\n");
+
 	printf("D: Deletes files\n");
+	printf("Format: ./yourfile.out D filename.extension\n\n");
+	
 	printf("P: Prints files\n");
+	printf("Format: ./yourfile.out P filename.extension\n\n");
+
 	printf("M: Creates and stores file\n");
 	
 	return;
@@ -43,9 +49,12 @@ void helpScreen()
 
 int main(int argc, char* argv[])
 {
-	if(argc > 2)
+	// conditional for covering minimal and maximal amount of arguments for each command
+	if(((*argv[1] == 'L' && argc != 2)
+		|| (*argv[1] == 'P' && argc != 3)))
 	{
-		printf("Too many arguments, only accepts one argument\n");
+		printf("Invalid argument number, check accepted argument formats for proper command calling\n");
+		helpScreen();
 		return 0;
 	}
 	else if(argc == 1)
@@ -94,20 +103,52 @@ int main(int argc, char* argv[])
 			dir[i]=fgetc(floppy);
 		// if-else for user input 
 		if(*argv[1] == 'L')
-		{	
+		{
+			int byteTotal = 0; // integer for the total number of bytes 
+
 			// print directory
-			printf("\nDisk directory:\n");
-			printf("Name    Type Start Length\n");
+			printf("Disk directory:\n");
+			// starting at zero, moving through sector in 16 bit chunks 
 			for (i=0; i<512; i=i+16) 
 			{
+				// stops when we hit our first zero, because everything is 
+				// allocated continguously 
 				if (dir[i]==0) break;
-				for (j=0; j<8; j++) {
-					if (dir[i+j]==0) printf(" "); else printf("%c",dir[i+j]);
+				
+				// moving through first byte bit by bit...first byte is 
+				// name 
+				for (j=0; j<8; j++) 
+				{
+					//if (dir[i+j]==0) printf(" "); else printf("%c",dir[i+j]);
+					if(dir[i+j] != 0)
+					{
+						printf("%c", dir[i+j]);
+					}
 				}
-				if ((dir[i+8]=='t') || (dir[i+8]=='T')) printf("text"); else printf("exec");
-				printf(" %5d %6d bytes\n", dir[i+9], 512*dir[i+10]);
-			}
+			 	
+					
+				// moves through second byte bite by bit, this is padded with 
+				// seven zeroes and then a t or x at the end
 
+				if(dir[i+8] == 't')
+				{
+					printf(".t");
+				}
+				else if(dir[i+8] == 'x')
+				{
+					printf(".x");
+				}
+
+				printf("\t");
+
+				//printf(" %5d %6d bytes\n", dir[i+9], 512*dir[i+10]);
+				
+				// add the space taken up by this file to total taken space
+
+				byteTotal = byteTotal + 512*dir[i+10];
+			}
+			printf("\nFree space: %i\nB", 261632 - byteTotal);
+			printf("Space used: %i/261632B\n", byteTotal);
 		}
 		else 
 		{

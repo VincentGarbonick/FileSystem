@@ -221,7 +221,37 @@ int main(int argc, char* argv[])
 			// if we manage to find the flag and we find the contents of file...
 			if(foundFlag == 1) 
 			{
-				printf("FOUND\n");
+				// we must check if the file is executable...if it is an exe we must not print it 
+				if(dir[foundIndex + 8] == 'x')
+				{
+					printf("ERROR: FILE IS NOT A TEXT FILE\n");
+					return 0;
+				}
+
+				// since we know the file is in the directory
+				// we must get the start sector
+				int startSector = dir[foundIndex + 9];
+				// and sector size 
+				int sectorLength = dir[foundIndex + 10];
+				
+				char contents[512 * sectorLength]; // define a character buffer
+
+				fseek(floppy, startSector*512, SEEK_SET); // locate sector where file is
+
+				for(int m = 0; m < (512 * sectorLength); m++)
+				{
+					contents[m] = fgetc(floppy);
+				}
+				
+				int n = 0; 
+				while(contents[n] != 0) 
+				{
+					printf("%c", contents[n]);
+					n++;
+
+				}
+
+
 			}
 			else
 			{

@@ -133,11 +133,11 @@ int main(int argc, char* argv[])
 							printf("%c", dir[i+j]);
 						}
 					}
-			 		
-						
+
+
 					// moves through second byte bite by bit, this is padded with 
 					// seven zeroes and then a t or x at the end
-	
+
 					if(dir[i+8] == 't')
 					{
 						printf(".t");
@@ -146,13 +146,13 @@ int main(int argc, char* argv[])
 					{
 						printf(".x");
 					}
-	
+
 					printf("\t");
-	
+
 					//printf(" %5d %6d bytes\n", dir[i+9], 512*dir[i+10]);
-					
+
 					// add the space taken up by this file to total taken space
-	
+
 					byteTotal = byteTotal + 512*dir[i+10];
 				}
 			}
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
 			
 				// stop when we hit our first zero, because everything is allocated contiguously 
 				// also stop if we found where the word was 
-				if(dir[i] == 0 || foundFlag == 1) break;
+				if(foundFlag == 1) break;
 				// go through each non null terminated letter of our input arg
 					
 				j = 0; // counting variable for going through argv 
@@ -286,9 +286,8 @@ int main(int argc, char* argv[])
 			for(int i = 0; i < 512; i += 16)
 			{
 			
-				// stop when we hit our first zero, because everything is allocated contiguously 
-				// also stop if we found where the word was 
-				if(dir[i] == 0 || foundFlag == 1) break;
+				
+				if(foundFlag == 1) break;
 				// go through each non null terminated letter of our input arg
 					
 				j = 0; // counting variable for going through argv 
@@ -494,9 +493,8 @@ int main(int argc, char* argv[])
 			for(int i = 0; i < 512; i += 16)
 			{
 			
-				// stop when we hit our first zero, because everything is allocated contiguously 
-				// also stop if we found where the word was 
-				if(dir[i] == 0 || foundFlag == 1) break;
+				
+				if(foundFlag == 1) break;
 				// go through each non null terminated letter of our input arg
 					
 				j = 0; // counting variable for going through argv 

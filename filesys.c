@@ -53,6 +53,12 @@ void helpScreen()
 
 int main(int argc, char* argv[])
 {
+	if(argc == 1)
+	{
+		printf("Please enter a command\n");
+		helpScreen();
+		return 0;
+	}
 	// conditional for covering minimal and maximal amount of arguments for each command
 	if((*argv[1] == 'L' && argc != 2)
 		|| (*argv[1] == 'P' && argc != 3)
@@ -436,6 +442,7 @@ int main(int argc, char* argv[])
 
 
 		}
+		/*
 		else if(*argv[1] == 'Z')
 		{
 			//print disk map
@@ -472,6 +479,7 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
+		*/
 		else if(*argv[1] == 'D')
 		{
 			
@@ -548,12 +556,6 @@ int main(int argc, char* argv[])
 				{
 					map[startSector + i] = 0;
 				}
-
-				for(int i = 0; i < 200; i++)
-				{
-					printf("%i: %c %i\n", i, dir[i], dir[i]);
-				}
-				printf("%i", foundIndex);
 			}
 		}
 		else 

@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
 	if((*argv[1] == 'L' && argc != 2)
 		|| (*argv[1] == 'P' && argc != 3)
 		|| (*argv[1] == 'M' && argc != 3)
-		|| (*argv[1] == 'Z' && argc != 3))
+		|| (*argv[1] == 'D' && argc != 3))
 	{
 		printf("Invalid argument number, check accepted argument formats for proper command calling\n");
 		helpScreen();
@@ -120,41 +120,41 @@ int main(int argc, char* argv[])
 			// starting at zero, moving through sector in 16 bit chunks 
 			for (i=0; i<512; i=i+16) 
 			{
-				// stops when we hit our first zero, because everything is 
-				// allocated continguously 
-				if (dir[i]==0) break;
-				
-				// moving through first byte bit by bit...first byte is 
-				// name 
-				for (j=0; j<8; j++) 
+				// if first byte is equal to 0, it's a deleted entry or free space, so skip it 
+				if(dir[i] != 0)
 				{
-					//if (dir[i+j]==0) printf(" "); else printf("%c",dir[i+j]);
-					if(dir[i+j] != 0)
+					// moving through first byte bit by bit...first byte is 
+					// name 
+					for (j=0; j<8; j++) 
 					{
-						printf("%c", dir[i+j]);
+						//if (dir[i+j]==0) printf(" "); else printf("%c",dir[i+j]);
+						if(dir[i+j] != 0)
+						{
+							printf("%c", dir[i+j]);
+						}
 					}
-				}
-			 	
+			 		
+						
+					// moves through second byte bite by bit, this is padded with 
+					// seven zeroes and then a t or x at the end
+	
+					if(dir[i+8] == 't')
+					{
+						printf(".t");
+					}
+					else if(dir[i+8] == 'x')
+					{
+						printf(".x");
+					}
+	
+					printf("\t");
+	
+					//printf(" %5d %6d bytes\n", dir[i+9], 512*dir[i+10]);
 					
-				// moves through second byte bite by bit, this is padded with 
-				// seven zeroes and then a t or x at the end
-
-				if(dir[i+8] == 't')
-				{
-					printf(".t");
+					// add the space taken up by this file to total taken space
+	
+					byteTotal = byteTotal + 512*dir[i+10];
 				}
-				else if(dir[i+8] == 'x')
-				{
-					printf(".x");
-				}
-
-				printf("\t");
-
-				//printf(" %5d %6d bytes\n", dir[i+9], 512*dir[i+10]);
-				
-				// add the space taken up by this file to total taken space
-
-				byteTotal = byteTotal + 512*dir[i+10];
 			}
 			printf("\nFree space: %iB\n", 261632 - byteTotal);
 			printf("Space used: %i/261632B\n", byteTotal);
@@ -463,18 +463,19 @@ int main(int argc, char* argv[])
 			printf("\nDisk directory:\n");
 			printf("Name    Type Start Length\n");
     		for (i=0; i<512; i=i+16) {
-				if (dir[i]==0) break;
-				for (j=0; j<8; j++) {
-					if (dir[i+j]==0) printf(" "); else printf("%c",dir[i+j]);
+				if(dir[i] != 0)
+				{
+					for (j=0; j<8; j++) {
+						if (dir[i+j]==0) printf(" "); else printf("%c",dir[i+j]);
+					}
+					if ((dir[i+8]=='t') || (dir[i+8]=='T')) printf("text"); else printf("exec");
+					printf(" %5d %6d bytes\n", dir[i+9], 512*dir[i+10]);
 				}
-				if ((dir[i+8]=='t') || (dir[i+8]=='T')) printf("text"); else printf("exec");
-				printf(" %5d %6d bytes\n", dir[i+9], 512*dir[i+10]);
 			}
 		}
 		else if(*argv[1] == 'D')
 		{
 			
-
 			int argumentSize = 0;
 			int j = 0;
 			
@@ -531,16 +532,31 @@ int main(int argc, char* argv[])
 						}
 					}
 				}
-
-				if(foundFlag == 1)
+			}
+			if(foundFlag == 0)
+			{
+				printf("FILE NOT FOUND\n");
+			}
+			else if(foundFlag == 1)
+			{
+				
+				dir[foundIndex] = 0; // set first byte of file name to zero 
+				
+				// for each byte associated with the file, set the first map byte to zero 
+			
+				int startSector = dir[foundIndex + 9]; // the sector we should start at 
+				// foundIndex + 10 is where the length is 
+				for(int i = 0; i < dir[foundIndex + 10]; i++)
 				{
-					break;
+					map[startSector + i] = 0;
 				}
 
-
-
-
-
+				for(int i = 0; i < 200; i++)
+				{
+					printf("%i: %c %i\n", i, dir[i], dir[i]);
+				}
+				printf("%i", foundIndex);
+			}
 		}
 		else 
 		{
